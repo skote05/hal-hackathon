@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FADEC Fuel Control Simulation</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div id="control-panel">
+    <div class="panel-header">
+        <h2>FADEC Control System</h2>
+    </div>
+    
+    <!-- Throttle Control -->
+    <div class="control-group">
+        <label for="throttle">Throttle Position (%)</label>
+        <input type="range" id="throttle" min="0" max="100" value="0" step="1">
+        <span id="throttle-value">0%</span>
+    </div>
+
+    <!-- Fuel Quantity Control (Slider should go here!) -->
+    <div class="control-group">
+        <label for="fuelQuantitySlider">Fuel Quantity (L)</label>
+        <input type="range" id="fuelQuantitySlider" min="0" max="100" value="0" step="1">
+        <span id="fuelQuantityValue">0 L</span>
+    </div>
+    
+    <!-- Fuel Flow Display -->
+    <div class="display-group">
+        <div class="display-item">
+            <span class="label">Fuel Flow:</span>
+            <span id="fuel-flow">0.0 L/min</span>
+        </div>
+        <div class="display-item">
+            <span class="label">System Status:</span>
+            <span id="system-status" class="status-normal">Normal</span>
+        </div>
+    </div>
+    
+    <!-- Fault Simulation -->
+    <div class="fault-controls">
+        <h3>Fault Simulation</h3>
+        <button id="primary-probe-fail">Primary Probe Failure</button>
+        <button id="backup-probe-fail">Backup Probe Failure</button>
+        <button id="reset-faults">Reset All Faults</button>
+    </div>
+</div>
+
+<!-- 3D Canvas Container goes here after control panel -->
+<div id="canvas-container"></div>
+
+
+    
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loader"></div>
+        <p>Loading FADEC System...</p>
+    </div>
+    
+    <script type="module" src="main.js"></script>
+</body>
+</html>
