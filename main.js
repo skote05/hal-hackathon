@@ -24,11 +24,13 @@ class FADECSimulation {
             0.1,
             1000
         );
+        
         this.camera.position.set(6, 5, 8);
 
         // Renderer setup
         this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.clippingPlanes = [];
         this.renderer.shadowMap.enabled = false;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         document.getElementById('canvas-container').appendChild(this.renderer.domElement);
