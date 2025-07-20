@@ -51,7 +51,7 @@ class FADECSimulation {
         this.camera = new THREE.PerspectiveCamera(
             75, window.innerWidth * 0.7 / window.innerHeight, 0.1, 1000
         );
-        this.camera.position.set(6, 5, 8);
+        this.camera.position.set(2, 1, 5);
 
         this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         const canvasContainer = document.getElementById('canvas-container');
@@ -417,11 +417,11 @@ class FADECSimulation {
     updateFuelLevel(quantity) {
         const tank = this.components.Fuel_Tank;
         if (tank && tank.material) {
-            tank.material.transparent = quantity >= 30;
-            tank.material.opacity = quantity >= 30 ? 0.3 : 1.0;
+            tank.material.transparent = quantity >= 10;
+            tank.material.opacity = quantity >= 10 ? 0.3 : 1.0;
             tank.material.needsUpdate = true;
         }
-        const fuelLevel = Math.max(quantity / 100, 0.01);
+        const fuelLevel = Math.max(quantity / 3000, 0.01);
         this.fuelMesh.scale.y = fuelLevel;
     }
 
