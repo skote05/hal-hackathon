@@ -49,15 +49,16 @@ class FADECSimulation {
         this.scene.background = new THREE.Color(0xf0f0f0);
 
         this.camera = new THREE.PerspectiveCamera(
-            75, window.innerWidth / window.innerHeight, 0.1, 1000
+            75, window.innerWidth * 0.7 / window.innerHeight, 0.1, 1000
         );
         this.camera.position.set(6, 5, 8);
 
         this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        const canvasContainer = document.getElementById('canvas-container');
+        this.renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
         this.renderer.shadowMap.enabled = false;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        document.getElementById('canvas-container').appendChild(this.renderer.domElement);
+        canvasContainer.appendChild(this.renderer.domElement);
 
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableDamping = true;
@@ -135,6 +136,8 @@ class FADECSimulation {
             this.fuelFlowSystem = new FuelFlowSystem(this.scene, this.components, this.fuelMesh);
             this.setupThrottleControl();
             this.modelLoaded = true;
+            // Hide loading screen after model is loaded
+            document.getElementById('loading-screen').style.display = 'none';
         } catch (error) {
             console.error('Could not load FADEC model:', error);
         }
@@ -227,13 +230,6 @@ class FADECSimulation {
               <input type="range" id="rotationSpeed" min="0.01" max="0.2" value="0.08" step="0.01">
               <span id="rotationSpeedValue">0.08</span>
             </div>
-            <div style="margin-top: 15px; font-size: 12px; color: #666;">
-              <p>Left Solenoid ON → Land Assembly moves LEFT, Feedback Rod rotates ANTICLOCKWISE</p>
-              <p>Right Solenoid ON → Land Assembly moves RIGHT, Feedback Rod rotates CLOCKWISE</p>
-              <p>Maximum rotation: ±2.5 degrees</p>
-              <p>Current Feedback Rod Rotation: <span id="feedbackRotationDisplay">0°</span></p>
-              <p>Land Assembly Position: <span id="landPositionDisplay">0.0</span> units</p>
-            </div>
           </div>
         `;
         controlsDiv.appendChild(solenoidControlsDiv);
@@ -296,25 +292,17 @@ class FADECSimulation {
     updateFeedbackRodRotation() {
         let targetRotation = 0;
         let targetLandPosition = 0;
-        // let targetLeftSpringScale = 1.0;
-        // let targetRightSpringScale = 1.0;
         if (this.leftSolenoidActive) {
             const intensity = this.leftSolenoidCurrent / 100;
             targetRotation = -intensity * this.maxRotationAngle;
             targetLandPosition = -intensity * this.maxLandMovement; // Now moves LEFT!
-            // targetLeftSpringScale = 1.0 + (intensity * (this.maxSpringExtension - 1.0));
-            // targetRightSpringScale = 1.0 - (intensity * this.maxSpringCompression);
         } else if (this.rightSolenoidActive) {
             const intensity = this.rightSolenoidCurrent / 100;
             targetRotation = intensity * this.maxRotationAngle;
             targetLandPosition = intensity * this.maxLandMovement; // Now moves RIGHT!
-            // targetRightSpringScale = 1.0 + (intensity * (this.maxSpringExtension - 1.0));
-            // targetLeftSpringScale = 1.0 - (intensity * this.maxSpringCompression);
         }
         this.targetFeedbackRodRotation = targetRotation;
         this.targetLandAssemblyPosition = targetLandPosition;
-        // this.targetLeftSpringScale = targetLeftSpringScale;
-        // this.targetRightSpringScale = targetRightSpringScale;
 
         const rotationDisplay = document.getElementById('feedbackRotationDisplay');
         if (rotationDisplay) {
@@ -438,9 +426,10 @@ class FADECSimulation {
     }
 
     onWindowResize() {
-        this.camera.aspect = window.innerWidth / window.innerHeight;
+        const canvasContainer = document.getElementById('canvas-container');
+        this.camera.aspect = canvasContainer.clientWidth / canvasContainer.clientHeight;
         this.camera.updateProjectionMatrix();
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
     }
 
     animate() {
