@@ -45,78 +45,93 @@ export class FuelFlowSystem {
             clearcoatRoughness: 0.05
         });
 
-        let verticalGeometry, horizontalGeometry;
-        let radius, height;
+        let verticalGeometry, horizontalGeometry, secondVerticalGeometry;
+        let radius, height, secondHeight;
 
         if (pipeName === 'Fuel_supply_pipe') {
             radius = Math.min(size.x, size.z) * 0.35;
-            height = size.y * 0.95 - 0.02; // Shorten by 0.02
+            height = size.y * 0.95 - 0.02;
 
-            // Vertical section
             const verticalPoints = [
-                new THREE.Vector3(0, height / 2, 0), // Top
-                new THREE.Vector3(0, -height / 2, 0), // Bottom
+                new THREE.Vector3(0, height / 2, 0),
+                new THREE.Vector3(0, -height / 2, 0),
             ];
             const verticalCurve = new THREE.CatmullRomCurve3(verticalPoints, false, 'catmullrom', 0);
             verticalGeometry = new THREE.TubeGeometry(verticalCurve, 16, radius, 16, false);
 
-            // Horizontal section (+Z turn)
             const horizontalPoints = [
-                new THREE.Vector3(0, -height / 2, 0), // Start at bottom
-                new THREE.Vector3(0, -height / 2, radius * 3), // Extend to +Z
+                new THREE.Vector3(0, -height / 2, 0),
+                new THREE.Vector3(0, -height / 2, radius * 3),
             ];
             const horizontalCurve = new THREE.CatmullRomCurve3(horizontalPoints, false, 'catmullrom', 0);
             horizontalGeometry = new THREE.TubeGeometry(horizontalCurve, 16, radius, 16, false);
-            this._supplyPipeRadius = radius; // Store radius
+            this._supplyPipeRadius = radius;
         } else if (pipeName === 'Below_Mid_pipe') {
-            // Horizontal along X-axis for bidirectional flow
             radius = Math.min(size.y, size.z) * 0.35;
-            height = size.x * 0.95 + 0.1; // Extend by 0.1
+            height = size.x * 0.95 + 0.1;
             const curvePoints = [
-                new THREE.Vector3(-height / 2 - 0.05, 0, 0), // Left end
-                new THREE.Vector3(0, 0, 0), // Middle
-                new THREE.Vector3(height / 2 + 0.025, 0, 0), // Right end
+                new THREE.Vector3(-height / 2 - 0.05, 0, 0),
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(height / 2 + 0.025, 0, 0),
             ];
             const curve = new THREE.CatmullRomCurve3(curvePoints, false, 'catmullrom', 0);
-            verticalGeometry = new THREE.TubeGeometry(curve, 32, radius, 16, false); // Use as vertical for consistency
+            verticalGeometry = new THREE.TubeGeometry(curve, 32, radius, 16, false);
         } else if (pipeName === 'Left_pipe') {
-            // Vertical pipe turning right (+X) at top
-            radius = Math.min(size.x, size.z) * 0.35 / 3; // 3x smaller radius
-            height = size.y * 0.95 * 0.75 + 0.02; // Adjusted height
-            // Vertical section
+            radius = Math.min(size.x, size.z) * 0.35 / 3;
+            height = size.y * 0.95 * 0.75 + 0.02;
+            secondHeight = (height * 0.5) / 2;
+
             const verticalPoints = [
-                new THREE.Vector3(0, -height / 2, 0), // Bottom
-                new THREE.Vector3(0, height / 2, 0), // Top
+                new THREE.Vector3(0, -height / 2, 0),
+                new THREE.Vector3(0, height / 2, 0),
             ];
             const verticalCurve = new THREE.CatmullRomCurve3(verticalPoints, false, 'catmullrom', 0);
             verticalGeometry = new THREE.TubeGeometry(verticalCurve, 16, radius, 16, false);
-            // Horizontal section (+X turn)
+
             const horizontalPoints = [
-                new THREE.Vector3(0, height / 2, 0), // Start at top
-                new THREE.Vector3(radius * 32, height / 2, 0), // Extend to +X
+                new THREE.Vector3(0, height / 2, 0),
+                new THREE.Vector3(radius * 32, height / 2, 0),
             ];
             const horizontalCurve = new THREE.CatmullRomCurve3(horizontalPoints, false, 'catmullrom', 0);
             horizontalGeometry = new THREE.TubeGeometry(horizontalCurve, 16, radius, 16, false);
-            this._leftPipeRadius = radius; // Store radius
+
+            const secondVerticalPoints = [
+                new THREE.Vector3(radius * 32, 0, 0),
+                new THREE.Vector3(radius * 32, secondHeight, 0),
+            ];
+            const secondVerticalCurve = new THREE.CatmullRomCurve3(secondVerticalPoints, false, 'catmullrom', 0);
+            secondVerticalGeometry = new THREE.TubeGeometry(secondVerticalCurve, 16, radius, 16, false);
+            this._leftPipeRadius = radius;
+            this._leftPipeHeight = height;
+            this._leftPipeSecondHeight = secondHeight;
         } else if (pipeName === 'Right_pipe') {
-            // Vertical pipe turning left (-X) at top
-            radius = Math.min(size.x, size.z) * 0.35 / 3; // 3x smaller radius
-            height = size.y * 0.95 * 0.75 + 0.02; // Adjusted height
-            // Vertical section
+            radius = Math.min(size.x, size.z) * 0.35 / 3;
+            height = size.y * 0.95 * 0.75 + 0.02;
+            secondHeight = (height * 0.5) / 2;
+
             const verticalPoints = [
-                new THREE.Vector3(0, -height / 2, 0), // Bottom
-                new THREE.Vector3(0, height / 2, 0), // Top
+                new THREE.Vector3(0, -height / 2, 0),
+                new THREE.Vector3(0, height / 2, 0),
             ];
             const verticalCurve = new THREE.CatmullRomCurve3(verticalPoints, false, 'catmullrom', 0);
             verticalGeometry = new THREE.TubeGeometry(verticalCurve, 16, radius, 16, false);
-            // Horizontal section (-X turn)
+
             const horizontalPoints = [
-                new THREE.Vector3(0, height / 2, 0), // Start at top
-                new THREE.Vector3(-radius * 31, height / 2, 0), // Extend to -X
+                new THREE.Vector3(0, height / 2, 0),
+                new THREE.Vector3(-radius * 31, height / 2, 0),
             ];
             const horizontalCurve = new THREE.CatmullRomCurve3(horizontalPoints, false, 'catmullrom', 0);
             horizontalGeometry = new THREE.TubeGeometry(horizontalCurve, 16, radius, 16, false);
-            this._rightPipeRadius = radius; // Store radius
+
+            const secondVerticalPoints = [
+                new THREE.Vector3(-radius * 31, 0, 0),
+                new THREE.Vector3(-radius * 31, secondHeight, 0),
+            ];
+            const secondVerticalCurve = new THREE.CatmullRomCurve3(secondVerticalPoints, false, 'catmullrom', 0);
+            secondVerticalGeometry = new THREE.TubeGeometry(secondVerticalCurve, 16, radius, 16, false);
+            this._rightPipeRadius = radius;
+            this._rightPipeHeight = height;
+            this._rightPipeSecondHeight = secondHeight;
         } else {
             radius = Math.min(size.y, size.z) * 0.35;
             height = size.x * 0.95;
@@ -124,7 +139,6 @@ export class FuelFlowSystem {
             verticalGeometry.rotateZ(Math.PI / 2);
         }
 
-        // Create vertical mesh (and horizontal if applicable)
         const verticalMesh = new THREE.Mesh(verticalGeometry, fuelMaterial);
         const yOffset = pipeName === 'Fuel_supply_pipe' ? 0.025 : (pipeName === 'Left_pipe' || pipeName === 'Right_pipe' ? -0.05 : 0);
         verticalMesh.position.set(center.x + xOffset, center.y + yOffset, center.z + zOffset);
@@ -145,6 +159,17 @@ export class FuelFlowSystem {
             horizontalMesh.castShadow = false;
             horizontalMesh.receiveShadow = false;
             this.liquidMeshes.set(`${pipeName}_horizontal`, horizontalMesh);
+
+            if (pipeName === 'Left_pipe' || pipeName === 'Right_pipe') {
+                const secondVerticalMesh = new THREE.Mesh(secondVerticalGeometry, fuelMaterial);
+                secondVerticalMesh.position.set(center.x + xOffset, center.y + yOffset + height / 2, center.z + zOffset);
+                secondVerticalMesh.scale.copy(pipeScale);
+                secondVerticalMesh.visible = false;
+                this.scene.add(secondVerticalMesh);
+                secondVerticalMesh.castShadow = false;
+                secondVerticalMesh.receiveShadow = false;
+                this.liquidMeshes.set(`${pipeName}_second_vertical`, secondVerticalMesh);
+            }
         }
 
         console.log(`Created fuel mesh for ${pipeName}:`, {
@@ -168,10 +193,12 @@ export class FuelFlowSystem {
             this._leftPipeHeight = height;
             this._leftPipeBottomY = center.y + yOffset - height / 2;
             this._leftPipeTopY = center.y + yOffset + height / 2;
+            this._leftPipeSecondTopY = center.y + yOffset + height / 2 + secondHeight;
         } else if (pipeName === 'Right_pipe') {
             this._rightPipeHeight = height;
             this._rightPipeBottomY = center.y + yOffset - height / 2;
             this._rightPipeTopY = center.y + yOffset + height / 2;
+            this._rightPipeSecondTopY = center.y + yOffset + height / 2 + secondHeight;
         }
     }
 
@@ -206,50 +233,33 @@ export class FuelFlowSystem {
         });
         this.flowAnimations = [];
         
-        const supplyVerticalMesh = this.liquidMeshes.get('Fuel_supply_pipe_vertical');
-        const supplyHorizontalMesh = this.liquidMeshes.get('Fuel_supply_pipe_horizontal');
-        if (supplyVerticalMesh) {
-            supplyVerticalMesh.visible = false;
-            supplyVerticalMesh.scale.y = 0.01;
-            supplyVerticalMesh.position.y = this._supplyPipeTopY;
-        }
-        if (supplyHorizontalMesh) {
-            supplyHorizontalMesh.visible = false;
-            supplyHorizontalMesh.scale.y = 1;
-            supplyHorizontalMesh.material.clippingPlanes = [];
-        }
+        const meshes = [
+            'Fuel_supply_pipe_vertical',
+            'Fuel_supply_pipe_horizontal',
+            'Below_Mid_pipe_vertical',
+            'Left_pipe_vertical',
+            'Left_pipe_horizontal',
+            'Left_pipe_second_vertical',
+            'Right_pipe_vertical',
+            'Right_pipe_horizontal',
+            'Right_pipe_second_vertical'
+        ];
         
-        const belowMidMesh = this.liquidMeshes.get('Below_Mid_pipe_vertical');
-        if (belowMidMesh) {
-            belowMidMesh.visible = false;
-            belowMidMesh.scale.y = 0.01;
-        }
-        
-        const leftVerticalMesh = this.liquidMeshes.get('Left_pipe_vertical');
-        const leftHorizontalMesh = this.liquidMeshes.get('Left_pipe_horizontal');
-        if (leftVerticalMesh) {
-            leftVerticalMesh.visible = false;
-            leftVerticalMesh.scale.y = 0.01;
-            leftVerticalMesh.position.y = this._leftPipeBottomY;
-        }
-        if (leftHorizontalMesh) {
-            leftHorizontalMesh.visible = false;
-            leftHorizontalMesh.scale.y = 1;
-            leftHorizontalMesh.material.clippingPlanes = [];
-        }
-        
-        const rightVerticalMesh = this.liquidMeshes.get('Right_pipe_vertical');
-        const rightHorizontalMesh = this.liquidMeshes.get('Right_pipe_horizontal');
-        if (rightVerticalMesh) {
-            rightVerticalMesh.visible = false;
-            rightVerticalMesh.scale.y = 0.01;
-            rightVerticalMesh.position.y = this._rightPipeBottomY;
-        }
-        if (rightHorizontalMesh) {
-            rightHorizontalMesh.visible = false;
-            rightHorizontalMesh.scale.y = 1;
-            rightHorizontalMesh.material.clippingPlanes = [];
-        }
+        meshes.forEach(key => {
+            const mesh = this.liquidMeshes.get(key);
+            if (mesh) {
+                mesh.visible = false;
+                mesh.scale.y = key.includes('vertical') ? 0.01 : 1;
+                if (key === 'Left_pipe_vertical') mesh.position.y = this._leftPipeBottomY;
+                if (key === 'Right_pipe_vertical') mesh.position.y = this._rightPipeBottomY;
+                if (key === 'Left_pipe_second_vertical') mesh.position.y = this._leftPipeTopY;
+                if (key === 'Right_pipe_second_vertical') mesh.position.y = this._rightPipeTopY;
+                if (key === 'Left_pipe_horizontal' || key === 'Right_pipe_horizontal') {
+                    mesh.material.clippingPlanes = [];
+                    mesh.material.needsUpdate = true;
+                }
+            }
+        });
         
         this.resetPipeTransparency('Fuel_supply_pipe');
         this.resetPipeTransparency('Below_Mid_pipe');
@@ -291,10 +301,16 @@ export class FuelFlowSystem {
         const belowMidMesh = this.liquidMeshes.get('Below_Mid_pipe_vertical');
         const leftVerticalMesh = this.liquidMeshes.get('Left_pipe_vertical');
         const leftHorizontalMesh = this.liquidMeshes.get('Left_pipe_horizontal');
+        const leftSecondVerticalMesh = this.liquidMeshes.get('Left_pipe_second_vertical');
         const rightVerticalMesh = this.liquidMeshes.get('Right_pipe_vertical');
         const rightHorizontalMesh = this.liquidMeshes.get('Right_pipe_horizontal');
+        const rightSecondVerticalMesh = this.liquidMeshes.get('Right_pipe_second_vertical');
         
-        if (!supplyVerticalMesh || !supplyHorizontalMesh || !belowMidMesh || !leftVerticalMesh || !leftHorizontalMesh || !rightVerticalMesh || !rightHorizontalMesh) {
+        const meshesNotFound = !supplyVerticalMesh || !supplyHorizontalMesh || !belowMidMesh ||
+            !leftVerticalMesh || !leftHorizontalMesh || !leftSecondVerticalMesh ||
+            !rightVerticalMesh || !rightHorizontalMesh || !rightSecondVerticalMesh;
+        
+        if (meshesNotFound) {
             console.error('Required liquid meshes not found');
             return;
         }
@@ -311,24 +327,30 @@ export class FuelFlowSystem {
         leftVerticalMesh.position.y = this._leftPipeBottomY;
         leftHorizontalMesh.scale.y = 1;
         leftHorizontalMesh.visible = false;
+        leftSecondVerticalMesh.scale.y = 0.01;
+        leftSecondVerticalMesh.visible = false;
+        leftSecondVerticalMesh.position.y = this._leftPipeTopY;
         rightVerticalMesh.scale.y = 0.01;
         rightVerticalMesh.visible = false;
         rightVerticalMesh.position.y = this._rightPipeBottomY;
         rightHorizontalMesh.scale.y = 1;
         rightHorizontalMesh.visible = false;
+        rightSecondVerticalMesh.scale.y = 0.01;
+        rightSecondVerticalMesh.visible = false;
+        rightSecondVerticalMesh.position.y = this._rightPipeTopY;
         
         const startTime = Date.now();
-        const durationSupply = 2000; // Fuel_supply_pipe
-        const durationSupplyHorizontal = 500; // Horizontal turn
-        const durationBelowMid = 1000; // Below_Mid_pipe
-        const durationLeftRight = 1000; // Left_pipe and Right_pipe
-        const durationLeftRightHorizontal = 500; // Horizontal turns
+        const durationSupply = 2000;
+        const durationSupplyHorizontal = 500;
+        const durationBelowMid = 1000;
+        const durationLeftRight = 1000;
+        const durationLeftRightHorizontal = 500;
+        const durationLeftRightSecondVertical = 500;
 
         const animate = () => {
             if (!this.isFlowing) return;
             const elapsed = Date.now() - startTime;
             
-            // Animate Fuel_supply_pipe (top to bottom, then +Z turn)
             if (elapsed <= durationSupply) {
                 supplyVerticalMesh.visible = true;
                 const progress = Math.min(elapsed / durationSupply, 1);
@@ -340,20 +362,14 @@ export class FuelFlowSystem {
                 supplyHorizontalMesh.visible = true;
                 const horizontalProgress = Math.min((elapsed - durationSupply) / durationSupplyHorizontal, 1);
                 supplyHorizontalMesh.scale.y = Math.max(horizontalProgress, 0.01);
-            }
-            
-            // Animate Below_Mid_pipe (bidirectional)
-            if (elapsed > durationSupply + durationSupplyHorizontal && elapsed <= durationSupply + durationSupplyHorizontal + durationBelowMid) {
+            } else if (elapsed <= durationSupply + durationSupplyHorizontal + durationBelowMid) {
                 supplyVerticalMesh.scale.y = 1;
                 supplyHorizontalMesh.scale.y = 1;
                 belowMidMesh.visible = true;
                 const belowMidProgress = Math.min((elapsed - durationSupply - durationSupplyHorizontal) / durationBelowMid, 1);
                 const belowMidLevel = Math.max(belowMidProgress, 0.01);
                 belowMidMesh.scale.y = belowMidLevel;
-            }
-            
-            // Animate Left_pipe and Right_pipe (bottom to top, then turns)
-            if (elapsed > durationSupply + durationSupplyHorizontal + durationBelowMid && elapsed <= durationSupply + durationSupplyHorizontal + durationBelowMid + durationLeftRight) {
+            } else if (elapsed <= durationSupply + durationSupplyHorizontal + durationBelowMid + durationLeftRight) {
                 supplyVerticalMesh.scale.y = 1;
                 supplyHorizontalMesh.scale.y = 1;
                 belowMidMesh.visible = true;
@@ -366,7 +382,7 @@ export class FuelFlowSystem {
                 leftVerticalMesh.position.y = this._leftPipeBottomY + (this._leftPipeHeight * leftRightLevel) / 2;
                 rightVerticalMesh.scale.y = leftRightLevel;
                 rightVerticalMesh.position.y = this._rightPipeBottomY + (this._rightPipeHeight * leftRightLevel) / 2;
-            } else if (elapsed > durationSupply + durationSupplyHorizontal + durationBelowMid && elapsed <= durationSupply + durationSupplyHorizontal + durationBelowMid + durationLeftRight + durationLeftRightHorizontal) {
+            } else if (elapsed <= durationSupply + durationSupplyHorizontal + durationBelowMid + durationLeftRight + durationLeftRightHorizontal) {
                 supplyVerticalMesh.scale.y = 1;
                 supplyHorizontalMesh.scale.y = 1;
                 belowMidMesh.visible = true;
@@ -376,22 +392,36 @@ export class FuelFlowSystem {
                 leftHorizontalMesh.visible = true;
                 rightHorizontalMesh.visible = true;
                 const horizontalProgress = Math.min((elapsed - durationSupply - durationSupplyHorizontal - durationBelowMid - durationLeftRight) / durationLeftRightHorizontal, 1);
-                // Clip Left_pipe horizontal (+X) from x=0 to x=radius*32
                 const leftClipX = this._leftPipeRadius * 32 * horizontalProgress;
                 const leftPlane = new THREE.Plane(new THREE.Vector3(-1, 0, 0), leftClipX + (this._leftPipeBottomY + this._leftPipeHeight / 2 + this._leftPipeRadius * 32));
                 leftHorizontalMesh.material.clippingPlanes = [leftPlane];
                 leftHorizontalMesh.material.needsUpdate = true;
-                // Clip Right_pipe horizontal (-X) from x=0 to x=-radius*31
                 const rightClipX = -this._rightPipeRadius * 31 * horizontalProgress;
                 const rightPlane = new THREE.Plane(new THREE.Vector3(1, 0, 0), rightClipX - (this._rightPipeBottomY + this._rightPipeHeight / 2 - this._rightPipeRadius * 31));
                 rightHorizontalMesh.material.clippingPlanes = [rightPlane];
                 rightHorizontalMesh.material.needsUpdate = true;
+            } else if (elapsed <= durationSupply + durationSupplyHorizontal + durationBelowMid + durationLeftRight + durationLeftRightHorizontal + durationLeftRightSecondVertical) {
+                supplyVerticalMesh.scale.y = 1;
+                supplyHorizontalMesh.scale.y = 1;
+                belowMidMesh.visible = true;
+                belowMidMesh.scale.y = 1;
+                leftVerticalMesh.scale.y = 1;
+                rightVerticalMesh.scale.y = 1;
+                leftHorizontalMesh.visible = true;
+                rightHorizontalMesh.visible = true;
+                leftHorizontalMesh.material.clippingPlanes = [];
+                rightHorizontalMesh.material.clippingPlanes = [];
+                leftSecondVerticalMesh.visible = true;
+                rightSecondVerticalMesh.visible = true;
+                const secondVerticalProgress = Math.min((elapsed - durationSupply - durationSupplyHorizontal - durationBelowMid - durationLeftRight - durationLeftRightHorizontal) / durationLeftRightSecondVertical, 1);
+                const secondVerticalLevel = Math.max(secondVerticalProgress, 0.01);
+                leftSecondVerticalMesh.scale.y = secondVerticalLevel;
+                rightSecondVerticalMesh.scale.y = secondVerticalLevel;
             }
             
-            if (elapsed < durationSupply + durationSupplyHorizontal + durationBelowMid + durationLeftRight + durationLeftRightHorizontal) {
+            if (elapsed < durationSupply + durationSupplyHorizontal + durationBelowMid + durationLeftRight + durationLeftRightHorizontal + durationLeftRightSecondVertical) {
                 requestAnimationFrame(animate);
             } else {
-                // Ensure clipping planes are cleared at the end
                 leftHorizontalMesh.material.clippingPlanes = [];
                 leftHorizontalMesh.material.needsUpdate = true;
                 rightHorizontalMesh.material.clippingPlanes = [];
@@ -409,14 +439,16 @@ export class FuelFlowSystem {
         if (!this.isFlowing) return;
         
         const meshes = [
-            this.liquidMeshes.get('Fuel_supply_pipe_vertical'),
-            this.liquidMeshes.get('Fuel_supply_pipe_horizontal'),
-            this.liquidMeshes.get('Below_Mid_pipe_vertical'),
-            this.liquidMeshes.get('Left_pipe_vertical'),
-            this.liquidMeshes.get('Left_pipe_horizontal'),
-            this.liquidMeshes.get('Right_pipe_vertical'),
-            this.liquidMeshes.get('Right_pipe_horizontal')
-        ];
+            'Fuel_supply_pipe_vertical',
+            'Fuel_supply_pipe_horizontal',
+            'Below_Mid_pipe_vertical',
+            'Left_pipe_vertical',
+            'Left_pipe_horizontal',
+            'Left_pipe_second_vertical',
+            'Right_pipe_vertical',
+            'Right_pipe_horizontal',
+            'Right_pipe_second_vertical'
+        ].map(key => this.liquidMeshes.get(key));
         
         meshes.forEach(mesh => {
             if (mesh && mesh.visible) {
